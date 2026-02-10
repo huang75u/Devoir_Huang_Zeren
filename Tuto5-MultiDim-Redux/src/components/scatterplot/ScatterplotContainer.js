@@ -60,11 +60,17 @@ function ScatterplotContainer({xAttributeName, yAttributeName}){
         }
         const handleOnMouseLeave = function(){
         }
+        const handleOnBrushEnd = function(selectedItemsData){
+            // Dispatch the brush-selected items to Redux store
+            console.log("Brush selected items:", selectedItemsData.length);
+            dispatch(setSelectedItems(selectedItemsData))
+        }
 
         const controllerMethods={
             handleOnClick,
             handleOnMouseEnter,
-            handleOnMouseLeave
+            handleOnMouseLeave,
+            handleOnBrushEnd
         }
 
         // get the current instance of scatterplotD3 from the Ref...

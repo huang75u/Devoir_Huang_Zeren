@@ -13,6 +13,8 @@ class ScatterplotD3 {
     circleRadius = 3;
     xScale;
     yScale;
+    brush;
+    brushG;
 
 
     constructor(el){
@@ -46,6 +48,14 @@ class ScatterplotD3 {
         this.svg.append("g")
             .attr("class","yAxisG")
         ;
+
+        // Initialize brush
+        this.brush = d3.brush()
+            .extent([[0, 0], [this.width, this.height]]);
+        
+        // Create a group for the brush
+        this.brushG = this.svg.append("g")
+            .attr("class", "brush");
     }
 
     changeBorderAndOpacity(selection, selected){
@@ -87,6 +97,36 @@ class ScatterplotD3 {
         //      - this.changeBorderAndOpacity(selection,false) for objects not in selectedItems
     }
 
+    setupBrush = function(visData, xAttribute, yAttribute, onBrushEnd){
+        const that = this;
+        
+        this.brush.on("end", function(event) {
+            const selection = event.selection;
+            
+            if (!selection) {
+                // If no selection (brush cleared), dispatch empty array
+                onBrushEnd([]);
+                return;
+            }
+            
+            // Get the brush coordinates
+            const [[x0, y0], [x1, y1]] = selection;
+            
+            // Find all points within the brush selection
+            const selectedItems = visData.filter(d => {
+                const x = that.xScale(d[xAttribute]);
+                const y = that.yScale(d[yAttribute]);
+                return x >= x0 && x <= x1 && y >= y0 && y <= y1;
+            });
+            
+            // Call the callback with selected items
+            onBrushEnd(selectedItems);
+        });
+        
+        // Apply the brush to the brush group
+        this.brushG.call(this.brush);
+    }
+
     updateAxis = function(visData,xAttribute,yAttribute){
         // compute min max using d3.min/max(visData.map(item=>item.attribute))
         const minX = d3.min(visData.map(item=>item[xAttribute]))
@@ -114,6 +154,11 @@ class ScatterplotD3 {
 
         // build the size scales and x,y axis
         this.updateAxis(visData,xAttribute,yAttribute);
+
+        // Setup brush if onBrushEnd callback is provided
+        if (controllerMethods.handleOnBrushEnd) {
+            this.setupBrush(visData, xAttribute, yAttribute, controllerMethods.handleOnBrushEnd);
+        }
 
         this.svg.selectAll(".markerG")
             // all elements with the class .cellG (empty the first time)
