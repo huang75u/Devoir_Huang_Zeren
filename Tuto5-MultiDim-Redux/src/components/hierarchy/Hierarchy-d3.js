@@ -304,6 +304,26 @@ class HierarchyD3 {
             });
     }
 
+    // Highlight hovered item
+    highlightHoveredItem = function(hoveredItem) {
+        if (!hoveredItem || !hoveredItem.index) {
+            // Remove hover highlight
+            this.svg.selectAll(".node-circle, .node-rect")
+                .style("filter", null);
+            return;
+        }
+
+        const hoveredIndex = hoveredItem.index;
+        
+        this.svg.selectAll(".node-circle, .node-rect")
+            .style("filter", d => {
+                if (d.data && d.data.index === hoveredIndex) {
+                    return "brightness(1.3) drop-shadow(0 0 8px rgba(255, 215, 0, 0.8))";
+                }
+                return null;
+            });
+    }
+
     clear = function() {
         d3.select(this.el).selectAll("*").remove();
     }

@@ -12,6 +12,9 @@ export const itemInteractionSlice = createSlice({
     setSelectedItems: (state, action) => {
       return {...state, selectedItems: action.payload}
     },
+    setHoveredItem: (state, action) => {
+      return {...state, hoveredItem: action.payload}
+    },
     // addValueToAnArray: (state, action) => {
     //   return [...state, action.payload]
     // },
@@ -28,6 +31,6 @@ export const itemInteractionSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { setSelectedItems/* , addValueToAnArray, updateAnArray */ } = itemInteractionSlice.actions
+export const { setSelectedItems, setHoveredItem/* , addValueToAnArray, updateAnArray */ } = itemInteractionSlice.actions
 
 export default itemInteractionSlice.reducer

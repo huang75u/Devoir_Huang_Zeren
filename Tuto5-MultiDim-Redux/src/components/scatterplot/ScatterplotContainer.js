@@ -5,11 +5,12 @@ import {useSelector, useDispatch} from 'react-redux'
 import ScatterplotD3 from './Scatterplot-d3';
 
 // TODO: import action methods from reducers
-import { setSelectedItems } from '../../redux/ItemInteractionSlice'
+import { setSelectedItems, setHoveredItem } from '../../redux/ItemInteractionSlice'
 
 function ScatterplotContainer({xAttributeName, yAttributeName}){
     const visData = useSelector(state =>state.dataSet)
     const selectedItems = useSelector(state => state.itemInteraction.selectedItems);
+    const hoveredItem = useSelector(state => state.itemInteraction.hoveredItem);
     const dispatch = useDispatch();
 
     // every time the component re-render
@@ -90,6 +91,13 @@ function ScatterplotContainer({xAttributeName, yAttributeName}){
         const scatterplotD3 = scatterplotD3Ref.current;
         scatterplotD3.highlightSelectedItems(selectedItems);
     },[selectedItems])
+
+    useEffect(()=>{
+        const scatterplotD3 = scatterplotD3Ref.current;
+        if (scatterplotD3 && scatterplotD3.highlightHoveredItem) {
+            scatterplotD3.highlightHoveredItem(hoveredItem);
+        }
+    },[hoveredItem])
 
     const handleClearButtonClick = () => {
         const scatterplotD3 = scatterplotD3Ref.current;

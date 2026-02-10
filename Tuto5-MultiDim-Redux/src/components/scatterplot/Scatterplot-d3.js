@@ -104,6 +104,25 @@ class ScatterplotD3 {
         //      - this.changeBorderAndOpacity(selection,false) for objects not in selectedItems
     }
 
+    highlightHoveredItem(hoveredItem){
+        if (!hoveredItem || !hoveredItem.index) {
+            // Remove hover highlight
+            this.svg.selectAll(".markerG")
+                .style("filter", null);
+            return;
+        }
+
+        const hoveredIndex = hoveredItem.index;
+        
+        this.svg.selectAll(".markerG")
+            .style("filter", function(d) {
+                if (d.index === hoveredIndex) {
+                    return "brightness(1.5) drop-shadow(0 0 8px rgba(255, 215, 0, 0.9))";
+                }
+                return null;
+            });
+    }
+
     setupBrush = function(visData, xAttribute, yAttribute, onBrushEnd, onClearSelection){
         const that = this;
         

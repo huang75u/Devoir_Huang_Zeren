@@ -3,11 +3,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 
 import HierarchyD3 from './Hierarchy-d3';
-import { setSelectedItems } from '../../redux/ItemInteractionSlice'
+import { setSelectedItems, setHoveredItem } from '../../redux/ItemInteractionSlice'
 
 function HierarchyContainer() {
     const visData = useSelector(state => state.dataSet);
     const selectedItems = useSelector(state => state.itemInteraction.selectedItems);
+    const hoveredItem = useSelector(state => state.itemInteraction.hoveredItem);
     const dispatch = useDispatch();
 
     // State to manage layout type
@@ -55,11 +56,13 @@ function HierarchyContainer() {
         }
 
         const handleOnMouseEnter = function(itemData) {
-            // Could highlight on hover
+            // Highlight on hover
+            dispatch(setHoveredItem(itemData));
         }
 
         const handleOnMouseLeave = function() {
-            // Could remove hover highlight
+            // Remove hover highlight
+            dispatch(setHoveredItem({}));
         }
 
         const controllerMethods = {
@@ -81,6 +84,14 @@ function HierarchyContainer() {
             hierarchyD3.highlightSelectedItems(selectedItems);
         }
     }, [selectedItems]);
+
+    // Update highlights when hoveredItem changes
+    useEffect(() => {
+        const hierarchyD3 = hierarchyD3Ref.current;
+        if (hierarchyD3 && hierarchyD3.highlightHoveredItem) {
+            hierarchyD3.highlightHoveredItem(hoveredItem);
+        }
+    }, [hoveredItem]);
 
     // Handle layout type change
     const handleLayoutChange = (event) => {
