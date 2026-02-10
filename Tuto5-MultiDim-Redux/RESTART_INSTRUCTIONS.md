@@ -48,3 +48,4 @@ Cmd + Shift + R  (Mac)
 检查文件是否正确保存：
 - `src/components/hierarchy/Hierarchy-d3.js` 应该包含 `highlightHoveredItem` 方法
 - `src/components/scatterplot/Scatterplot-d3.js` 应该包含 `highlightHoveredItem` 方法
+/。
