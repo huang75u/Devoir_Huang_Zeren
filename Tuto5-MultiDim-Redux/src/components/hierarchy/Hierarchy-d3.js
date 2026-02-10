@@ -120,24 +120,78 @@ class HierarchyD3 {
                 controllerMethods.handleOnMouseLeave();
             });
 
+        // Add background rectangles for state labels
+        const stateNodes = node.filter(d => d.depth === 1 && d.r > 25);
+        
+        stateNodes.append("rect")
+            .attr("class", "label-background")
+            .attr("x", d => {
+                const fontSize = Math.max(Math.min(d.r / 2.5, 24), 14);
+                const textWidth = d.data.name.length * fontSize * 0.6;
+                return -textWidth / 2;
+            })
+            .attr("y", d => {
+                const fontSize = Math.max(Math.min(d.r / 2.5, 24), 14);
+                return -fontSize * 0.7;
+            })
+            .attr("width", d => {
+                const fontSize = Math.max(Math.min(d.r / 2.5, 24), 14);
+                return d.data.name.length * fontSize * 0.6;
+            })
+            .attr("height", d => {
+                const fontSize = Math.max(Math.min(d.r / 2.5, 24), 14);
+                return fontSize * 1.2;
+            })
+            .attr("rx", 4)
+            .attr("fill", "rgba(0, 0, 0, 0.7)")
+            .style("pointer-events", "none");
+
         // Add labels for state level (depth 1)
-        node.filter(d => d.depth === 1)
-            .append("text")
+        stateNodes.append("text")
             .attr("class", "node-label")
             .attr("text-anchor", "middle")
-            .attr("dy", "0.3em")
-            .text(d => d.r > 20 ? d.data.name : "")
-            .style("font-size", d => Math.min(d.r / 3, 16) + "px");
+            .attr("dy", "0.35em")
+            .text(d => d.data.name)
+            .style("font-size", d => Math.max(Math.min(d.r / 2.5, 24), 14) + "px")
+            .style("font-weight", "bold")
+            .style("fill", "#fff")
+            .style("pointer-events", "none");
 
-        // Add labels for community level (depth 2) - only for larger circles
-        node.filter(d => d.depth === 2 && d.r > 15)
-            .append("text")
+        // Add background for community labels
+        const communityNodes = node.filter(d => d.depth === 2 && d.r > 12);
+        
+        communityNodes.append("rect")
+            .attr("class", "label-background")
+            .attr("x", d => {
+                const fontSize = Math.max(Math.min(d.r / 1.8, 12), 8);
+                const textWidth = d.data.name.length * fontSize * 0.5;
+                return -textWidth / 2;
+            })
+            .attr("y", d => {
+                const fontSize = Math.max(Math.min(d.r / 1.8, 12), 8);
+                return -fontSize * 0.65;
+            })
+            .attr("width", d => {
+                const fontSize = Math.max(Math.min(d.r / 1.8, 12), 8);
+                return d.data.name.length * fontSize * 0.5;
+            })
+            .attr("height", d => {
+                const fontSize = Math.max(Math.min(d.r / 1.8, 12), 8);
+                return fontSize * 1.1;
+            })
+            .attr("rx", 2)
+            .attr("fill", "rgba(0, 0, 0, 0.6)")
+            .style("pointer-events", "none");
+
+        // Add labels for community level (depth 2)
+        communityNodes.append("text")
             .attr("class", "node-text")
             .attr("text-anchor", "middle")
-            .attr("dy", "0.3em")
+            .attr("dy", "0.35em")
             .text(d => d.data.name)
-            .style("font-size", d => Math.min(d.r / 2, 10) + "px")
-            .style("fill", "#333");
+            .style("font-size", d => Math.max(Math.min(d.r / 1.8, 12), 8) + "px")
+            .style("fill", "#fff")
+            .style("pointer-events", "none");
     }
 
     // Treemap Layout

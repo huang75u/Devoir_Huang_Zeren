@@ -16,10 +16,13 @@
     font-size: 10px;
     pointer-events: none;
     user-select: none;
+    font-family: Arial, sans-serif;
 }
 
 .node-label {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: bold;
-    fill: #333;
+    pointer-events: none;
+    user-select: none;
+    font-family: Arial, sans-serif;
 }
