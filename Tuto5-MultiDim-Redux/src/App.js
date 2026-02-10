@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux'
 // here import other dependencies
 import { getDataSet } from './redux/DataSetSlice'
 import ScatterplotContainer from './components/scatterplot/ScatterplotContainer';
+import HierarchyContainer from './components/hierarchy/HierarchyContainer';
 
 // a component is a piece of code which render a part of the user interface
 function App() {
@@ -19,11 +20,8 @@ function App() {
   return (
     <div className="App">
         <div id={"MultiviewContainer"} className={"row"}>
-          {/*<ScatterplotContainer xAttributeName={"Temperature"} yAttributeName={"RentedBikeCount"}/>
-          <ScatterplotContainer xAttributeName={"Humidity"} yAttributeName={"RentedBikeCount"}/>*/}
           <ScatterplotContainer xAttributeName={"population"} yAttributeName={"ViolentCrimesPerPop"}/>
-          <ScatterplotContainer xAttributeName={"medIncome"} yAttributeName={"ViolentCrimesPerPop"}/>
-
+          <HierarchyContainer />
         </div>
     </div>
   );

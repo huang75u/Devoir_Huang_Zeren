@@ -1,0 +1,25 @@
+.hierarchyDivContainer{
+    height: 100%;
+}
+
+/* Node styling */
+.node-circle {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.node-circle:hover {
+    stroke-width: 3px;
+}
+
+.node-text {
+    font-size: 10px;
+    pointer-events: none;
+    user-select: none;
+}
+
+.node-label {
+    font-size: 12px;
+    font-weight: bold;
+    fill: #333;
+}

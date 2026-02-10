@@ -35,7 +35,14 @@ class ScatterplotD3 {
             .append("g")
             .attr("class","svgG")
             .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
-        ;
+        
+        // Add a background rectangle for double-click to clear
+        this.svg.append("rect")
+            .attr("class", "background")
+            .attr("width", this.width)
+            .attr("height", this.height)
+            .attr("fill", "none")
+            .attr("pointer-events", "all");
 
         this.xScale = d3.scaleLinear().range([0,this.width]);
         this.yScale = d3.scaleLinear().range([this.height,0]);
@@ -97,7 +104,7 @@ class ScatterplotD3 {
         //      - this.changeBorderAndOpacity(selection,false) for objects not in selectedItems
     }
 
-    setupBrush = function(visData, xAttribute, yAttribute, onBrushEnd){
+    setupBrush = function(visData, xAttribute, yAttribute, onBrushEnd, onClearSelection){
         const that = this;
         
         this.brush.on("end", function(event) {
@@ -125,6 +132,24 @@ class ScatterplotD3 {
         
         // Apply the brush to the brush group
         this.brushG.call(this.brush);
+
+        // Add double-click to clear selection
+        this.svg.select(".background")
+            .on("dblclick", function() {
+                // Clear the brush
+                that.brushG.call(that.brush.clear);
+                // Call the clear callback
+                if (onClearSelection) {
+                    onClearSelection();
+                }
+            });
+    }
+
+    // Method to clear brush selection programmatically
+    clearBrush = function() {
+        if (this.brushG && this.brush) {
+            this.brushG.call(this.brush.clear);
+        }
     }
 
     updateAxis = function(visData,xAttribute,yAttribute){
@@ -157,7 +182,7 @@ class ScatterplotD3 {
 
         // Setup brush if onBrushEnd callback is provided
         if (controllerMethods.handleOnBrushEnd) {
-            this.setupBrush(visData, xAttribute, yAttribute, controllerMethods.handleOnBrushEnd);
+            this.setupBrush(visData, xAttribute, yAttribute, controllerMethods.handleOnBrushEnd, controllerMethods.handleClearSelection);
         }
 
         this.svg.selectAll(".markerG")

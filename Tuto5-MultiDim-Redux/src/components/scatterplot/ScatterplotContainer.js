@@ -65,12 +65,19 @@ function ScatterplotContainer({xAttributeName, yAttributeName}){
             console.log("Brush selected items:", selectedItemsData.length);
             dispatch(setSelectedItems(selectedItemsData))
         }
+        
+        const handleClearSelection = function(){
+            // Clear selection in Redux store
+            console.log("Clearing selection");
+            dispatch(setSelectedItems([]))
+        }
 
         const controllerMethods={
             handleOnClick,
             handleOnMouseEnter,
             handleOnMouseLeave,
-            handleOnBrushEnd
+            handleOnBrushEnd,
+            handleClearSelection
         }
 
         // get the current instance of scatterplotD3 from the Ref...
@@ -84,9 +91,46 @@ function ScatterplotContainer({xAttributeName, yAttributeName}){
         scatterplotD3.highlightSelectedItems(selectedItems);
     },[selectedItems])
 
-    return(
-        <div ref={divContainerRef} className="scatterplotDivContainer col2">
+    const handleClearButtonClick = () => {
+        const scatterplotD3 = scatterplotD3Ref.current;
+        if (scatterplotD3) {
+            scatterplotD3.clearBrush();
+        }
+        dispatch(setSelectedItems([]));
+    }
 
+    return(
+        <div className="scatterplotDivContainer col2" style={{position: 'relative'}}>
+            {selectedItems.length > 0 && (
+                <div style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    zIndex: 1000,
+                    pointerEvents: 'auto'
+                }}>
+                    <button 
+                        onClick={handleClearButtonClick}
+                        style={{
+                            padding: '8px 16px',
+                            backgroundColor: '#ff6b6b',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '5px',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#ff5252'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = '#ff6b6b'}
+                    >
+                        Effacer la sélection ({selectedItems.length})
+                    </button>
+                </div>
+            )}
+            <div ref={divContainerRef} style={{width: '100%', height: '100%'}}>
+            </div>
         </div>
     )
 }
