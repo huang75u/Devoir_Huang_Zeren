@@ -8,7 +8,7 @@ class ScatterplotD3 {
     width;
     svg;
     // add specific class properties used for the vis render/updates
-    defaultOpacity=0.3;
+    defaultOpacity=0.15;  // Réduit de 0.3 à 0.15 pour plus de contraste
     transitionDuration=1000;
     circleRadius = 3;
     xScale;

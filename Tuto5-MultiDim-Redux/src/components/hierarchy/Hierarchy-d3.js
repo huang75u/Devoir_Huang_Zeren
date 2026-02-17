@@ -7,7 +7,7 @@ class HierarchyD3 {
     width;
     svg;
     // visualization properties
-    defaultOpacity = 0.7;
+    defaultOpacity = 0.25;  // Réduit de 0.7 à 0.25 pour plus de contraste
     highlightedOpacity = 1;
     transitionDuration = 500;
     colorScale;
@@ -106,18 +106,37 @@ class HierarchyD3 {
             })
             .attr("stroke-width", d => d.depth === 0 ? 0 : 2)
             .style("opacity", this.defaultOpacity)
+            .style("cursor", d => d.depth === 1 || d.depth === 2 ? "pointer" : "default")
             .on("click", (event, d) => {
-                if (d.depth === 2) { // Only community nodes
+                if (d.depth === 2) {
+                    // Community node: select single community
                     controllerMethods.handleOnClick(d.data);
+                } else if (d.depth === 1) {
+                    // State node: select ALL communities in this state
+                    const allCommunities = d.children.map(child => child.data);
+                    console.log("Circle Packing: State clicked, selecting", allCommunities.length, "communities");
+                    controllerMethods.handleOnStateClick(allCommunities);
                 }
             })
             .on("mouseenter", (event, d) => {
                 if (d.depth === 2) {
                     controllerMethods.handleOnMouseEnter(d.data);
+                } else if (d.depth === 1) {
+                    // Visual feedback for state hover - stronger effect
+                    d3.select(event.currentTarget)
+                        .style("filter", "brightness(1.3) drop-shadow(0 0 6px rgba(0, 0, 0, 0.4))")
+                        .attr("stroke-width", 4);
                 }
             })
             .on("mouseleave", (event, d) => {
-                controllerMethods.handleOnMouseLeave();
+                if (d.depth === 2) {
+                    controllerMethods.handleOnMouseLeave();
+                } else if (d.depth === 1) {
+                    // Remove hover effect
+                    d3.select(event.currentTarget)
+                        .style("filter", null)
+                        .attr("stroke-width", 2);
+                }
             });
 
         // Add background rectangles for state labels
@@ -230,8 +249,21 @@ class HierarchyD3 {
             .attr("stroke", "#fff")
             .attr("stroke-width", 1)
             .style("opacity", this.defaultOpacity)
+            .style("cursor", "pointer")
             .on("click", (event, d) => {
-                controllerMethods.handleOnClick(d.data);
+                // Check if Ctrl/Cmd is pressed
+                const isCtrlPressed = event.ctrlKey || event.metaKey;
+                
+                if (isCtrlPressed) {
+                    // Ctrl+Click: Select all communities in this state
+                    const stateData = d.parent.data;  // Parent is the state
+                    const allCommunities = d.parent.children.map(child => child.data);
+                    console.log("Ctrl+Click on Treemap, selecting all communities of state:", stateData.state, "count:", allCommunities.length);
+                    controllerMethods.handleOnStateClick(allCommunities);
+                } else {
+                    // Normal click: Select single community
+                    controllerMethods.handleOnClick(d.data);
+                }
             })
             .on("mouseenter", (event, d) => {
                 controllerMethods.handleOnMouseEnter(d.data);
@@ -289,6 +321,30 @@ class HierarchyD3 {
             .attr("class", "node")
             .attr("transform", d => `translate(${d.y},${d.x})`);
 
+        // Add larger invisible circles for easier clicking on community nodes
+        node.filter(d => d.depth === 2)
+            .append("circle")
+            .attr("r", 10)
+            .attr("fill", "transparent")
+            .attr("cursor", "pointer")
+            .on("click", (event, d) => {
+                controllerMethods.handleOnClick(d.data);
+            })
+            .on("mouseenter", (event, d) => {
+                // Show label on hover
+                d3.select(this.el).selectAll(".node-text")
+                    .filter(td => td === d)
+                    .style("opacity", 1);
+                controllerMethods.handleOnMouseEnter(d.data);
+            })
+            .on("mouseleave", (event, d) => {
+                // Hide label
+                d3.select(this.el).selectAll(".node-text")
+                    .filter(td => td === d && d.depth === 2)
+                    .style("opacity", 0);
+                controllerMethods.handleOnMouseLeave();
+            });
+
         node.append("circle")
             .attr("class", "node-circle")
             .attr("r", d => d.depth === 2 ? 4 : 6)
@@ -299,27 +355,21 @@ class HierarchyD3 {
             })
             .attr("stroke", "#fff")
             .attr("stroke-width", 2)
-            .on("click", (event, d) => {
-                if (d.depth === 2) {
-                    controllerMethods.handleOnClick(d.data);
-                }
-            })
-            .on("mouseenter", (event, d) => {
-                if (d.depth === 2) {
-                    controllerMethods.handleOnMouseEnter(d.data);
-                }
-            })
-            .on("mouseleave", (event, d) => {
-                controllerMethods.handleOnMouseLeave();
-            });
+            .style("opacity", this.defaultOpacity)
+            .style("pointer-events", "none");
 
+        // Add labels
         node.append("text")
             .attr("class", "node-text")
             .attr("dy", "0.31em")
             .attr("x", d => d.children ? -8 : 8)
             .attr("text-anchor", d => d.children ? "end" : "start")
             .text(d => d.data.name)
-            .style("font-size", d => d.depth === 1 ? "12px" : "9px");
+            .style("font-size", d => d.depth === 1 ? "12px" : "9px")
+            .style("font-weight", d => d.depth === 1 ? "bold" : "normal")
+            .style("fill", d => d.depth === 1 ? "#333" : "#666")
+            .style("opacity", d => d.depth === 1 ? 1 : 0)  // Cacher les labels des communautés par défaut
+            .style("pointer-events", "none");
     }
 
     // Main render function - defaults to Circle Packing
@@ -352,9 +402,35 @@ class HierarchyD3 {
             })
             .attr("stroke-width", d => {
                 if (d.data && selectedIndices.has(d.data.index)) {
-                    return 4;
+                    return 6;  // Augmenté de 4 à 6 pour plus de visibilité
                 }
                 return d.depth === 0 ? 0 : 2;
+            })
+            .style("filter", d => {
+                if (d.data && selectedIndices.has(d.data.index)) {
+                    // Ajouter luminosité et ombre pour les sélectionnés
+                    return "brightness(1.3) drop-shadow(0 0 4px rgba(0, 0, 0, 0.6))";
+                }
+                return null;
+            });
+
+        // For Tree layout: show labels of selected community nodes
+        this.svg.selectAll(".node-text")
+            .style("opacity", d => {
+                // Always show state labels (depth 1)
+                if (d.depth === 1) return 1;
+                // Show community labels (depth 2) only if selected
+                if (d.depth === 2 && d.data && selectedIndices.has(d.data.index)) {
+                    return 1;
+                }
+                // Hide other community labels
+                return d.depth === 2 ? 0 : 1;
+            })
+            .style("font-weight", d => {
+                if (d.data && selectedIndices.has(d.data.index)) {
+                    return "bold";
+                }
+                return d.depth === 1 ? "bold" : "normal";
             });
     }
 
